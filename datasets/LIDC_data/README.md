@@ -1,0 +1,1 @@
+This [code](https://github.com/stefanknegt/Probabilistic-Unet-Pytorch) has preprocessed LIDC data and stored them in a pickle file, which you can [download here](https://drive.google.com/drive/folders/1xKfKCQo8qa6SAr3u7qWNtQjIphIrvmd5). 
