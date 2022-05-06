@@ -6,17 +6,17 @@ We propose a novel pipeline to cope with noises in imperfect annotations for med
 
 # Useage
 ## Requirment
-code/installation/requirements.txt
-Python>=3.6
+code/installation/requirements.txt  
+Python>=3.6  
 Pytorch>=1.8.1
 
 ## Training
-For LIDC-IDRI dataset , run:
-cd code/tests/
+For LIDC-IDRI dataset , run:  
+cd code/tests/  
 python train_with_trainer_class.py
 ## Testing
-To test our model, please run inference_LIDC.py with the following setting:
-1.change the model_path to your pre-trained model;
+To test our model, please run inference_LIDC.py with the following setting:  
+1.change the model_path to your pre-trained model;  
 2.change the test_path to your testing data.
 # Citation
 @article{ReliableMutualDistillation,
