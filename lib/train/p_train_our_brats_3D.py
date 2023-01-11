@@ -76,24 +76,28 @@ class Trainer:
             if self.do_validation:
                 self.validate_epoch(epoch)
 
-            val_loss = self.writer.data['val']['loss'] / self.writer.data['val']['count']
-            val_loss2 = self.writer.data['val2']['loss'] / self.writer.data['val2']['count']
-            recent_val_dsc = self.writer.data['val']['dsc'] / self.writer.data['val']['count']
-            recent_val_dsc2 = self.writer.data['val2']['dsc'] / self.writer.data['val2']['count']
+#             val_loss = self.writer.data['val']['loss'] / self.writer.data['val']['count']
+#             val_loss2 = self.writer.data['val2']['loss'] / self.writer.data['val2']['count']
+#             recent_val_dsc = self.writer.data['val']['dsc'] / self.writer.data['val']['count']
+#             recent_val_dsc2 = self.writer.data['val2']['dsc'] / self.writer.data['val2']['count']
+            loss = self.writer.data['train']['loss'] / self.writer.data['train']['count']
+            loss2 = self.writer.data['train2']['loss'] / self.writer.data['train2']['count']
+            recent_dsc = self.writer.data['train']['dsc'] / self.writer.data['train']['count']
+            recent_dsc2 = self.writer.data['train2']['dsc'] / self.writer.data['train2']['count']
             if self.args.save is not None and (self.save_frequency):
                 # if self.args.save is not None and ((epoch + 1) % self.save_frequency):
                 self.model1.save_checkpoint(self.args.save,
-                                            epoch, recent_val_dsc,
+                                            epoch, recent_dsc,
                                             optimizer=self.optimizer1,
                                             model_num="model1")
                 self.model2.save_checkpoint(self.args.save,
-                                            epoch, recent_val_dsc2,
+                                            epoch, recent_dsc2,
                                             optimizer=self.optimizer2,
                                             model_num="model2")
 
             # Check if there was an improvement
-            is_best = recent_val_dsc > self.best_dsc
-            self.best_dsc = max(recent_val_dsc, self.best_dsc)
+            is_best = recent_dsc > self.best_dsc
+            self.best_dsc = max(recent_dsc, self.best_dsc)
             if not is_best:
                 self.epochs_since_improvement += 1
                 print("\nEpochs since last improvement: %d\n" % (self.epochs_since_improvement,))
@@ -104,8 +108,8 @@ class Trainer:
 
             self.writer.reset('train')
             self.writer.reset('train2')
-            self.writer.reset('val')
-            self.writer.reset('val2')
+#             self.writer.reset('val')
+#             self.writer.reset('val2')
 
     def train_epoch(self, epoch):
         self.model1.train()
@@ -215,39 +219,39 @@ class Trainer:
         self.writer.display_terminal(self.len_epoch, epoch, mode='train2', summary=True)
 
 
-    def validate_epoch(self, epoch):
-        self.model1.eval()
-        self.model2.eval()
+#     def validate_epoch(self, epoch):
+#         self.model1.eval()
+#         self.model2.eval()
 
 
-        for batch_idx, (input_tensor, target) in enumerate(self.valid_data_loader):
-            with torch.no_grad():
-                # input_tensor, target = prepare_input(input_tuple=input_tuple, args=self.args)
-                input_tensor.requires_grad = False
+#         for batch_idx, (input_tensor, target) in enumerate(self.valid_data_loader):
+#             with torch.no_grad():
+#                 # input_tensor, target = prepare_input(input_tuple=input_tuple, args=self.args)
+#                 input_tensor.requires_grad = False
 
-                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                input_tensor = input_tensor.to(device)
-                target = target.to(device)
-                input_tensor = torch.unsqueeze(input_tensor, 1)
-                #target = torch.unsqueeze(target, 1)
-                output1 = self.model1(input_tensor)
-                output2 = self.model2(input_tensor)
+#                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#                 input_tensor = input_tensor.to(device)
+#                 target = target.to(device)
+#                 input_tensor = torch.unsqueeze(input_tensor, 1)
+#                 #target = torch.unsqueeze(target, 1)
+#                 output1 = self.model1(input_tensor)
+#                 output2 = self.model2(input_tensor)
 
-                output1_label = torch.max(output1, 1)[1]
-                dsc = compute_per_channel_dsc(output1_label.unsqueeze(dim=1),target.unsqueeze(dim=1)).detach().cpu().numpy()
-                output2_label = torch.max(output2, 1)[1]
-                dsc2 = compute_per_channel_dsc(output2_label.unsqueeze(dim=1),target.unsqueeze(dim=1)).detach().cpu().numpy()
+#                 output1_label = torch.max(output1, 1)[1]
+#                 dsc = compute_per_channel_dsc(output1_label.unsqueeze(dim=1),target.unsqueeze(dim=1)).detach().cpu().numpy()
+#                 output2_label = torch.max(output2, 1)[1]
+#                 dsc2 = compute_per_channel_dsc(output2_label.unsqueeze(dim=1),target.unsqueeze(dim=1)).detach().cpu().numpy()
 
-                loss1 = nn.CrossEntropyLoss(reduction='mean')(output1, target.long())
-                loss2 = nn.CrossEntropyLoss(reduction='mean')(output2, target.long())
+#                 loss1 = nn.CrossEntropyLoss(reduction='mean')(output1, target.long())
+#                 loss2 = nn.CrossEntropyLoss(reduction='mean')(output2, target.long())
 
 
-                self.writer.update_scores(batch_idx, loss1.item(), dsc, 'val',
-                                          epoch * self.len_epoch + batch_idx)
-                self.writer.update_scores(batch_idx, loss2.item(), dsc2,'val2',
-                                          epoch * self.len_epoch + batch_idx)
-        self.writer.display_terminal(len(self.valid_data_loader), epoch, mode='val', summary=True)
-        self.writer.display_terminal(len(self.valid_data_loader), epoch, mode='val2', summary=True)
+#                 self.writer.update_scores(batch_idx, loss1.item(), dsc, 'val',
+#                                           epoch * self.len_epoch + batch_idx)
+#                 self.writer.update_scores(batch_idx, loss2.item(), dsc2,'val2',
+#                                           epoch * self.len_epoch + batch_idx)
+#         self.writer.display_terminal(len(self.valid_data_loader), epoch, mode='val', summary=True)
+#         self.writer.display_terminal(len(self.valid_data_loader), epoch, mode='val2', summary=True)
 
 
 
